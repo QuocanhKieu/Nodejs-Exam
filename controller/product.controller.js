@@ -1,11 +1,18 @@
 const Product = require("./../model/product.model");
 exports.listProduct = async (req, res) => {
     try {
-        const sortField = req.query.sort || 'ProductStoreCode';
-        const sortOrder = { [sortField]: -1 }; // Sort in descending order by default
-
-        const products = await Product.find().sort(sortOrder);
-        console.log("get here");
+        let products = undefined;
+        if (req.query.sort) {
+            const sortField = req.query.sort ;
+            const sortOrder = { [sortField]: -1 }; // Sort in descending order by default
+            
+        console.log("get in block");
+            
+            products = await Product.find().sort(sortOrder);
+        }
+        else {
+            products = await Product.find()
+        }
         res.render("product/index", {
             products: products
         });
@@ -39,3 +46,16 @@ exports.createProduct = async (req, res) => {
     }
   };
 
+  exports.deleteProduct = async (req, res) => {
+    try {
+      const product = await Product.findById(req.params.id);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      // await product.remove();
+      await Product.deleteOne({ _id: req.params.id });
+      res.redirect("/product");
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  };
